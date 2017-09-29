@@ -114,6 +114,20 @@ Module modGlobalFunction
         End If
     End Sub
 
+    Public Function getEnquiryRightByFormName(ByVal FormName As String) As Boolean
+        Dim dr() As DataRow
+        Dim Right As String = ""
+
+        dr = rs_SYUSRGRP_right.Tables("RESULT").Select("yug_usrfun = " & "'" & FormName & "' and yug_usrgrp = '" & gsUsrGrp & "'")
+
+        If Not dr.Length = 0 Then
+            getEnquiryRightByFormName = True
+        Else
+            getEnquiryRightByFormName = False
+        End If
+
+    End Function
+
     Public Sub Update_gs_Value(ByVal CoCde As String)
         Dim dr() As DataRow
 
@@ -283,11 +297,11 @@ Module modGlobalFunction
     End Function
 
 
-    Public Sub showForm(ByVal mnuItem As MenuItem, ByVal parent As Form)
+    Public Sub showForm(ByVal mnuItem As ToolStripMenuItem, ByVal parent As Form)
         Dim flg As Boolean = False
         Dim formName As String
+        formName = Split(CType(mnuItem, ToolStripMenuItem).Text.ToString, " - ")(0).Trim
 
-        formName = Split(CType(mnuItem, MenuItem).Text.ToString, " - ")(0).Trim
 
         For Each f As Form In parent.MdiChildren
             If f.Name = formName Then
@@ -304,6 +318,125 @@ Module modGlobalFunction
             End If
         End If
     End Sub
+
+    'Public Sub showForm(ByVal mnuItem As MenuItem, ByVal parent As Form)
+    '    Dim flg As Boolean = False
+    '    Dim formName As String
+
+    '    formName = Split(CType(mnuItem, MenuItem).Text.ToString, " - ")(0).Trim
+
+    '    For Each f As Form In parent.MdiChildren
+    '        If f.Name = formName Then
+    '            flg = True
+    '            f.BringToFront()
+    '        End If
+    '    Next
+
+    '    If Not flg Then
+    '        Dim f As Form = GetFormByName(formName)
+    '        If Not f Is Nothing Then
+    '            f.MdiParent = parent
+    '            f.Show()
+    '        End If
+    '    End If
+    'End Sub
+
+    Public Sub showForm2(ByVal mnuItem As ToolStripMenuItem, ByVal parent As Form)
+        Dim flg As Boolean = False
+        Dim formName, formShortName As String
+        formShortName = Mid(CType(mnuItem, ToolStripMenuItem).Name.ToString, 4, 5).Trim
+
+        gspStr = "sp_select_SYUSRGRP_1 '', 'UCG','" & gsUsrID & "'"
+
+        Dim rs_SYUSRGRP_right2 As New DataSet
+        rtnLong = execute_SQLStatement(gspStr, rs_SYUSRGRP_right2, rtnStr)
+
+        If rtnLong <> RC_SUCCESS Then
+            MessageBox.Show("SP Error on Global Function showForm2")
+            Exit Sub
+
+        End If
+        Dim dr() As DataRow = rs_SYUSRGRP_right2.Tables("RESULT").Select("yug_usrfun2 = '" & formShortName & "'")
+
+        formName = Mid(dr(0).Item("yug_usrfun2"), 1, 3) + "000" + Mid(dr(0).Item("yug_usrfun2"), 4, 2)
+        For Each f As Form In parent.MdiChildren
+            If f.Name = formName Then
+                flg = True
+                f.BringToFront()
+            End If
+        Next
+
+        If Not flg Then
+            Dim f As Form = GetFormByName(formName)
+            If Not f Is Nothing Then
+                f.MdiParent = parent
+                f.Show()
+            End If
+        End If
+    End Sub
+
+    Public Sub showFormbyCode(ByVal formShortName As String, ByVal parent As Form)
+        Dim flg As Boolean = False
+        Dim formName As String
+
+        gspStr = "sp_select_SYUSRGRP_1 '', 'UCG','" & gsUsrID & "'"
+
+        Dim rs_SYUSRGRP_right2 As New DataSet
+        rtnLong = execute_SQLStatement(gspStr, rs_SYUSRGRP_right2, rtnStr)
+
+        If rtnLong <> RC_SUCCESS Then
+            MessageBox.Show("SP Error on Global Function showFormbyCode")
+            Exit Sub
+        End If
+
+        Dim dr() As DataRow = rs_SYUSRGRP_right2.Tables("RESULT").Select("yug_usrfun2 = '" & formShortName & "'")
+        If dr.Length > 0 Then
+            formName = Mid(dr(0).Item("yug_usrfun2"), 1, 3) + "000" + Mid(dr(0).Item("yug_usrfun2"), 4, 2)
+            For Each f As Form In parent.MdiChildren
+                If f.Name = formName Then
+                    flg = True
+                    f.BringToFront()
+                End If
+            Next
+
+            If Not flg Then
+                Dim f As Form = GetFormByName(formName)
+                If Not f Is Nothing Then
+                    f.MdiParent = parent
+                    f.Show()
+                End If
+            End If
+        End If
+
+    End Sub
+
+    Public Function showFormInPanel(ByVal mnuItem As MenuItem, ByVal parent As Form) As Form
+        Dim flg As Boolean = False
+        Dim formName As String
+
+        formName = Split(CType(mnuItem, MenuItem).Text.ToString, " - ")(0).Trim
+
+        For Each f As Form In parent.MdiChildren
+            If f.Name = formName Then
+                flg = True
+            End If
+        Next
+
+        If Not flg Then
+            Dim f As Form = GetFormByName(formName)
+            If Not f Is Nothing Then
+                f.TopLevel = False
+                f.Visible = True
+                
+                Return f
+            Else
+                Return Nothing
+            End If
+        Else
+            Return Nothing
+
+        End If
+    End Function
 
     Public Function GetFormByName(ByVal formName As String) As Object
         Dim myasm As System.Reflection.Assembly = System.Reflection.Assembly.GetExecutingAssembly()

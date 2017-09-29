@@ -136,7 +136,9 @@
         Else
             Call SYS00002_Load(Nothing, Nothing)
         End If
+        cboMenuBarStyle.Enabled = False
 
+        cboMenuBarStyle.Text = ""
     End Sub
 
     Private Sub displayGrid()
@@ -252,10 +254,11 @@
             mmdFind.Enabled = False
             mmdCopy.Enabled = False
             mmdInsRow.Enabled = Enq_right_local
+            cboMenuBarStyle.Enabled = True
             Call SetStatusBar(mode)
             txtExpDat.Text = Now.AddDays(90)
             txtAccExp.Text = Now.AddYears(10)
-
+            cboMenuBarStyle.SelectedIndex = 0
         ElseIf mode = "InsRow" Then
             mmdCopy.Enabled = False
             mmdFind.Enabled = False
@@ -298,6 +301,9 @@
             DataGridRights.DataSource = Nothing
             txtUsrID.Enabled = True
             txtUsrID.Focus()
+
+            cboMenuBarStyle.Enabled = False
+            cboMenuBarStyle.Text = ""
             Call ResetDefaultDisp()
             Call SetStatusBar(mode)
         End If
@@ -717,6 +723,9 @@
                 txtMailAd.Text = dtr(0).Item("yup_mailad")
                 txtExpDat.Text = dtr(0).Item("yup_expdat")
                 txtAccExp.Text = dtr(0).Item("yup_accexp")
+                cboMenuBarStyle.Enabled = True
+                cboMenuBarStyle.SelectedItem = dtr(0).Item("yup_displaymode")
+                cboMenuBarStyle.Text = dtr(0).Item("yup_displaymode")
                 StatusBar.Items("lblRight").Text = Format(dtr(0).Item("yup_credat"), "MM/dd/yyyy") & " " & Format(dtr(0).Item("yup_upddat"), "MM/dd/yyyy") & " " & dtr(0).Item("yup_updusr")
                 For Each ctl As Control In GrpBoxMain.Controls
                     If TypeOf (ctl) Is TextBox Or TypeOf (ctl) Is MaskedTextBox Then
@@ -860,7 +869,7 @@
                             save_ok = False
                             flgReAct = True
 
-                        ElseIf Not chkGrdCellValue(row.Cells("yuc_supid"), "String", 12) Then
+                        ElseIf Not chkGrdCellValue(row.Cells("yuc_supid"), "String", 30) Then
                             save_ok = False
                             flgReAct = True
 
@@ -914,6 +923,7 @@
                                     txtExpDat.Text.Replace("'", "''").Trim & "','" & _
                                     txtMailAd.Text.Replace("'", "''").Trim & "','" & _
                                     gsUsrID & "','" & _
+                                    cboMenuBarStyle.Text.Replace("'", "''").Trim & "','" & _
                                     txtAccExp.Text.Replace("'", "''").Trim & "'"
                         If gspStr <> "" Then
                             rtnLong = execute_SQLStatement(gspStr, rs, rtnStr)
@@ -1006,6 +1016,7 @@
                                      txtExpDat.Text.Replace("'", "''").Trim & "','" & _
                                      txtMailAd.Text.Replace("'", "''").Trim & "','" & _
                                      gsUsrID & "','" & _
+                                    cboMenuBarStyle.Text.Replace("'", "''").Trim & "','" & _
                                      txtAccExp.Text.Replace("'", "''").Trim & "'"
 
                         If gspStr <> "" Then
